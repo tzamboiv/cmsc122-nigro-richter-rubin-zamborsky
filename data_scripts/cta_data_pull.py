@@ -79,7 +79,7 @@ def write_csv(dic):
 	and writes it to a CSV
 	'''
 	fieldnames = ["route", "stop_id", "stop_name", "lat", "lon", "id"]
-	with open("stops.csv", "w") as f:
+	with open("bus_stops.csv", "w") as f:
 		writer = csv.DictWriter(f, fieldnames = fieldnames)
 		writer.writeheader()
 		counter = 100000
