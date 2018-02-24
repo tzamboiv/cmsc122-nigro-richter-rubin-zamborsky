@@ -28,5 +28,6 @@ with open("shuttle_data.csv", "w") as f:
 		row["stop_name"] = stop
 		row["latitude"] = stops_info[stop]["lat"]
 		row["longitude"] = stops_info[stop]["lng"]
-		row["routes"] = ", ".join(stops_info[stop]["routes"])
-		writer.writerow(row)
+		for route in stops_info[stop]["routes"]:
+			row["routes"] = route
+			writer.writerow(row)
