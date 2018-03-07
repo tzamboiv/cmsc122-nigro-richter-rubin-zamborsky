@@ -1,0 +1,12 @@
+{% extends "travelprefs/header.html" %}
+
+{% block content %}
+<p>Hey, I'd like to ask some questions here</p>
+<p>Let's collect some data too!</p>
+<form method='post'>
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type='submit'>Submit</button>
+</form>
+<h2>{{ text }}</h2>
+{% endblock %}
