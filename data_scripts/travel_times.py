@@ -4,6 +4,7 @@ import googlemaps
 from datetime import datetime
 import requests
 
+
 def haversine(lat1, lon1, lat2, lon2):
     '''
     Calculate the circle distance between two points
@@ -31,7 +32,8 @@ def find_address_coords(address, gmaps):
 	return (lat, lon)
 
 
-def format_data_query(lat_range, lon_range, address, address_coords, gmaps, query_type):
+#modify to calculate travel times for POIs (i.e. outside of hyde park) by pulling stops from sql database that are within a certain radius
+def get_travel_times(lat_range, lon_range, address, address_coords, gmaps, query_type):
 	db = sqlite3.connect("transit.db")
 	c = db.cursor()
 	if query_type == "divvy":
@@ -55,32 +57,42 @@ def format_data_query(lat_range, lon_range, address, address_coords, gmaps, quer
 	routes = []
 	dest_coords = []
 	for route, coord in route_dict.items():
-		routes.append(route)
+		routes.append((route, coord))
 		dest_coords.append(coord)
 	query_return = gmaps.distance_matrix(origins=address, destinations=dest_coords, mode="walking")
 	walk_times = {}
 	for i, route in enumerate(query_return["rows"][0]["elements"]):
-		walk_times[routes[i]] = route["duration"]["value"]
+		walk_times[routes[i]] = {}
+		walk_times[routes[i]]["time"] = route["duration"]["value"]
 	return walk_times
 
+
 #Still need to manually categorize downtown vs. hyde park stops
+def check_if_in_range(address_coords):
+	#Hyde Park + Kenwood area
+	lat_range = (41.765605, 41.812444)
+	lon_range = (-87.625826, -87.583701)
+	if address_coords[0] < lat_range[0] or address_coords[0] > lat_range[1] or address_coords[1] < lon_range[0] or address_coords[1] > lon_range[1]:
+		return False
+	return lat_range, lon_range
+
 
 def go(address, transit_inputs):
 	api_key="AIzaSyB6jVa5oN8mBp8kna3l8obDYsqrb1ja6EE"
 	gmaps = googlemaps.Client(key=api_key)
 	address_coords = find_address_coords(address, gmaps)
-	#Hyde Park + Kenwood area
-	lat_range = (41.765605, 41.812444)
-	lon_range = (-87.625826, -87.583701)
-	if address_coords[0] < lat_range[0] or address_coords[0] > lat_range[1] or address_coords[1] < lon_range[0] or address_coords[1] > lon_range[1]:
-		return ("Error: Invalid Address")
-
+	hp_range = check_if_in_range(address_coords)
+	if not hp_range:
+		return ("Error: address not in Hyde Park")
+	lat_range = hp_range[0]
+	lon_range = hp_range[1]
 	output = {}
 	transit_types = []
-	if transit_inputs["bicycling"] != "none":
-		transit_types.append("divvy")
-	if transit_inputs["transit"] != "none":
-		transit_types.extend(["shuttles", "cta"]) 
+	for mode in ["divvy", "shuttles", "cta"]: 
+		if transit_inputs[mode] != "none":
+			transit_types.append(mode) 
 	for query_type in transit_types:
-		output[query_type] = format_data_query(lat_range, lon_range, address, address_coords, gmaps, query_type)
+		output[query_type] = get_travel_times(lat_range, lon_range, address, address_coords, gmaps, query_type)
+		for stop, info in output[query_type].items():
+			output[query_type][stop]["ranking"] = transit_inputs[query_type]
 	return output
