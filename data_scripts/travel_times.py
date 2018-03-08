@@ -26,10 +26,8 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 def find_address_coords(address, gmaps):
-	coords = gmaps.geocode(address)[0]["geometry"]["bounds"]
-	lat = (coords["northeast"]["lat"] + coords["southwest"]["lat"]) / 2
-	lon = (coords["northeast"]["lng"] + coords["southwest"]["lng"]) / 2
-	return (lat, lon)
+	coords = gmaps.geocode(address)[0]["geometry"]["location"]
+	return (coords['lat'], coords['lng'])
 
 
 #modify to calculate travel times for POIs (i.e. outside of hyde park) by pulling stops from sql database that are within a certain radius
