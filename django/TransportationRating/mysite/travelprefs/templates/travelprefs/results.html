@@ -1,0 +1,10 @@
+{% extends "travelprefs/header.html" %}
+
+{% block content %}
+	<h1>You made it to the results page!</h1>
+	<div class='container'>
+		{% for word in content %}
+			<h3>{{word.0}} {{word.1}}</h3>
+		{% endfor %}
+	</div>
+{% endblock %}
