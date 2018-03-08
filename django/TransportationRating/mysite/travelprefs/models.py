@@ -23,4 +23,5 @@ class All(models.Model):
 	bicycling = models.TextField(default = "none")
 	walking = models.TextField(default = "none")
 	downtown = models.TextField(default = "netiher")
+	southside = models.TextField(default = "no")
 

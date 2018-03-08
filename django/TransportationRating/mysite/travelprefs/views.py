@@ -24,6 +24,7 @@ class HomeView(TemplateView):
 class ResultsView(View):
 
 	def get(self, request):
-		return render(request, 'travelprefs/results.html', {'content':[('Did','this'),('this','work')]})
+		x = [("add", 1), ("bee", 2 )]
+		return render(request, 'travelprefs/results.html', {'content':x})
 
 
