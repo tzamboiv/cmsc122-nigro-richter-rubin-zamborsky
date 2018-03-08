@@ -18,3 +18,5 @@ class HomeView(TemplateView):
 			form.save()
 			form = HomeForm()
 		return HttpResponseRedirect(request.path_info)
+
+
