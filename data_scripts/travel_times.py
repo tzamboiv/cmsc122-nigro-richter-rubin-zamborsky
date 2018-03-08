@@ -70,7 +70,7 @@ def get_travel_times(lat_range, lon_range, address, address_coords, gmaps, query
 def check_if_in_range(address_coords):
 	#Hyde Park + Kenwood area
 	lat_range = (41.765605, 41.812444)
-	lon_range = (-87.625826, -87.583701)
+	lon_range = (-87.625826, -87.562809)
 	if address_coords[0] < lat_range[0] or address_coords[0] > lat_range[1] or address_coords[1] < lon_range[0] or address_coords[1] > lon_range[1]:
 		return False
 	return lat_range, lon_range
