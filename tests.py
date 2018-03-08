@@ -1,6 +1,6 @@
 t1 = (['5207 S Greenwood Chicago IL 60615',
   '  1210 E Hyde Park Blvd Chicago IL 60615'],
- ['grocery, bank'],
+ ['grocery', 'bank'],
  {'bicycling': 'high',
   'cta': 'medium',
   'divvy': 'high',
