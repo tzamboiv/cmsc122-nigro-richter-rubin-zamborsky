@@ -57,13 +57,14 @@ def get_travel_times(lat_range, lon_range, address, address_coords, gmaps, query
 	routes = []
 	dest_coords = []
 	for route, coord in route_dict.items():
-		routes.append((route, coord))
+		routes.append(route)
 		dest_coords.append(coord)
 	query_return = gmaps.distance_matrix(origins=address, destinations=dest_coords, mode="walking")
 	walk_times = {}
 	for i, route in enumerate(query_return["rows"][0]["elements"]):
 		walk_times[routes[i]] = {}
 		walk_times[routes[i]]["time"] = route["duration"]["value"]
+		walk_times[routes[i]]["coords"] = dest_coords[i]
 	return walk_times
 
 

@@ -24,7 +24,11 @@ def time_to_dest(address, address_coords, poi, transit_inputs, gmaps):
 				mode = "transit"
 			else:
 				mode = transit_type
-			output = gmaps.distance_matrix(origins=address, destinations=poi["formatted_address"], mode=mode)
+			current_time = datetime.now()
+			day = current_time.day + 1
+			noontime = datetime.now().replace(day=day, hour=18, minute=0, second=0, microsecond=0)
+			departure_time = (noontime - datetime.utcfromtimestamp(0)).total_seconds()
+			output = gmaps.distance_matrix(origins=address, destinations=poi["formatted_address"], mode=mode, departure_time=departure_time)
 			returns[transit_type] = {}
 			returns[transit_type]["time"] = output['rows'][0]['elements'][0]['duration']['value']
 			returns[transit_type]["ranking"] = ranking
@@ -61,12 +65,12 @@ def divvy_time_to_dest(address, poi, transit_inputs, gmaps):
 	closest_poi_stop = sorted([(poi_nearest_divvy_stops[p]['time'], p) for p in poi_nearest_divvy_stops])[0]
 	divvy_input = {"divvy" : transit_inputs["divvy"], "shuttles" : "none", "cta" : "none"}
 	address_nearest_divvy_stops = travel_times.go(address, divvy_input)['divvy']
-	closest_address_stop = sorted([(address_nearest_divvy_stops[p]['time'], p) for p in address_nearest_divvy_stops])[0]
-	output = gmaps.distance_matrix(origins=closest_address_stop[1][1], destinations=closest_poi_stop[1][1], mode="bicycling")
+	closest_address_stop = sorted([(address_nearest_divvy_stops[p]['time'], address_nearest_divvy_stops[p]["coords"], p) for p in address_nearest_divvy_stops])[0]
+	output = gmaps.distance_matrix(origins=closest_address_stop[1], destinations=closest_poi_stop[1][1], mode="bicycling")
 	divvy_dict = {}
 	divvy_dict["time"] = output['rows'][0]['elements'][0]['duration']['value'] + closest_address_stop[0] + closest_poi_stop[0]
 	divvy_dict["ranking"] = transit_inputs['divvy']
-	divvy_dict["notes"] = (closest_address_stop[1][0], closest_poi_stop[1][0])
+	divvy_dict["notes"] = (closest_address_stop[2], closest_poi_stop[1][0])
 	return divvy_dict
 
 
