@@ -52,12 +52,16 @@ def cta_goes_to_destination(cta_route, destination_code):
     bit_place = int(math.log(destination_code, 2))
     return ((classifier & (1 << bit_place)) != 0)
 
+# ------- Main Function for Interfacing with UI -------- #
+
 def compute_rankings(user_input):
+    '''
+    '''
     # Extract information
     apartment_list = user_input[0] # List of apartment addresses
     poi_list = user_input[1] # List of points of interest
     transit_prefs = user_input[2] # Dictionary mapping transit types to preference
-    cta_pref = user_input[3] # HP_PREF, DT_PREF, or NEITHER_PREF
+    cta_pref = user_input[3] # HP_PREF, DT_PREF, or neither
     south_side_str = user_input[4]
     south_side = (south_side_str.lower() == "yes") # Boolean
     
@@ -70,9 +74,22 @@ def compute_rankings(user_input):
     return {
         address: rating for address, rating in zip(apartment_list, address_ratings)
     }
-    
-    
+
+# ------- Helper Functions ------- #
+
+def weighted_average(nums, weights):
+    '''
+    Returns the weighted average of the numbers in nums, weighted based on the
+    weights given in weights. This function is used to ensure that all the
+    ratings are just heavily weighted averages of a lot of different travel times.
+    '''
+    return sum([n * weight for n, weight in zip(nums, weights)]) / sum(weights)
+
+
 def rating_for_address(address, poi_list, transit_prefs, cta_pref, south_side):
+    '''
+    Calculate a rating for a given address.
+    '''
     loc_rating = location_rating_for_address(address, transit_prefs, cta_pref, south_side)
     if poi_list:
         # Make sure poi_list is non-empty
@@ -95,6 +112,7 @@ def location_rating_for_address(address, transit_prefs, cta_pref, south_side):
     walking_times_dict = travel_times.go(address, transit_prefs)
     return normalized_location_rating(walking_times_dict, cta_pref, south_side)
 
+
 def normalized_location_rating(walking_times_dict, cta_pref, south_side):
     '''
     Produce a rating for a specific address based on its proximity to cta stops, divvy stops, and shuttle stops
@@ -107,9 +125,9 @@ def normalized_location_rating(walking_times_dict, cta_pref, south_side):
     
     # Calculate a rating for each travel_type
     ratings = {
-        CTA: cta_proximity_rating(walking_times_dict[CTA], cta_pref, south_side),
-        DIVVY: divvy_proximity_rating(walking_times_dict[DIVVY]),
-        SHUTTLE: shuttle_proximity_rating(walking_times_dict[SHUTTLE])
+        CTA: cta_proximity_rating(walking_times_dict[CTA], cta_pref, south_side) if CTA in walking_times_dict else 0,
+        DIVVY: divvy_proximity_rating(walking_times_dict[DIVVY]) if DIVVY in walking_times_dict else 0,
+        SHUTTLE: shuttle_proximity_rating(walking_times_dict[SHUTTLE]) if SHUTTLE in walking_times_dict else 0
     }
     
     # Calculate an overall proximity rating for this address
@@ -118,10 +136,9 @@ def normalized_location_rating(walking_times_dict, cta_pref, south_side):
     weightings = {
         HIGH: 4,
         MED: 2,
-        LOW: 1,
-        NONE: 0
+        LOW: 1
     }
-    for travel_type in [CTA, DIVVY, SHUTTLE]:
+    for travel_type in [ttype for ttype in [CTA, DIVVY, SHUTTLE] if ttype in walking_times_dict]:
         weight = weightings[importances[travel_type]]
         weights.append(weight)
         raw_rating += ratings[travel_type] * weight 
@@ -175,9 +192,6 @@ def cta_proximity_rating(cta_travel_times_dict, cta_pref, south_side):
     # Normalize this rating
     normalization_const = sum(dest_weightings.values())
     return raw_rating / (normalization_const if normalization_const > 0 else 1)
-
-def weighted_average(nums, weights):
-    return sum([n * weight for n, weight in zip(nums, weights)]) / sum(weights)
     
 def divvy_proximity_rating(divvy_travel_times_dict):
     '''
@@ -220,7 +234,9 @@ def find_closest_routes(travel_times_dict):
     
 
 def shuttle_proximity_rating(shuttle_travel_times_dict):
-    return 0
+    routes, times = find_closest_routes(shuttle_travel_times_dict)
+    weights = [3, 1] # Should be list of 2 numbers
+    return weighted_average(times, weights)
 
 def cta_hours(cta_line_name):
     pass
@@ -231,6 +247,9 @@ def shuttle_hours(shuttle_name):
 def normalized_rating_for_poi(poi_dict):
     '''
     Takes a dict for a specific POI and returns a rating for that POI
+    
+    TODO- Ignore travel types that won't be used when calculating the rating
+    (because of some combination of weak preference and inconvenience)
     '''
     ratings = {}
     weightings = {
@@ -244,7 +263,7 @@ def normalized_rating_for_poi(poi_dict):
     for travel_type in poi_dict:
         weight = weightings[poi_dict[travel_type]["ranking"]]
         weights.append(weight)
-        raw_rating += poi_dict[travel_type]["time"]
+        raw_rating += poi_dict[travel_type]["time"] * weight
     
     # Normalize the rating
     normalization_const = sum(weights)
