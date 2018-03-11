@@ -31,4 +31,26 @@ t2 = (['5105 South Harper Ave Chicago IL 60615'],
   'walking': 'none'},
  'downtown',
  'yes')
+ 
+ t4 = (['1005 E 60th Street'],
+ ['drug store'],
+ {'bicycling': 'medium',
+  'cta': 'none',
+  'divvy': 'medium',
+  'driving': 'medium',
+  'shuttles': 'none',
+  'walking': 'none'},
+ 'downtown',
+ 'yes')
+ 
+ t5 = (['1005 E 60th Street'],
+ [],
+ {'bicycling': 'medium',
+  'cta': 'none',
+  'divvy': 'medium',
+  'driving': 'medium',
+  'shuttles': 'none',
+  'walking': 'none'},
+ 'downtown',
+ 'yes')
 

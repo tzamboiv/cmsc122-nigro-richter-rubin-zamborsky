@@ -75,12 +75,13 @@ def divvy_time_to_dest(address, poi, transit_inputs, gmaps):
 
 
 def go(address, poi_query, transit_inputs):
-	api_key="AIzaSyB6jVa5oN8mBp8kna3l8obDYsqrb1ja6EE"
-	gmaps = googlemaps.Client(key=api_key)
-	address_coords = find_address_coords(address, gmaps)
-	if not check_if_in_range(address_coords):
-		return "Error: address not in Hyde Park"
-	poi = gmaps.places(poi_query, address_coords)["results"][0]
-	output_dict = time_to_dest(address, address_coords, poi, transit_inputs, gmaps)
-	output_dict["divvy"] = divvy_time_to_dest(address, poi, transit_inputs, gmaps)
-	return output_dict
+    api_key="AIzaSyB6jVa5oN8mBp8kna3l8obDYsqrb1ja6EE"
+    gmaps = googlemaps.Client(key=api_key)
+    address_coords = find_address_coords(address, gmaps)
+    if not check_if_in_range(address_coords):
+	    return "Error: address not in Hyde Park"
+    poi = gmaps.places(poi_query, address_coords)["results"][0]
+    output_dict = time_to_dest(address, address_coords, poi, transit_inputs, gmaps)
+    if transit_inputs["divvy"] != "none":
+        output_dict["divvy"] = divvy_time_to_dest(address, poi, transit_inputs, gmaps)
+    return output_dict
