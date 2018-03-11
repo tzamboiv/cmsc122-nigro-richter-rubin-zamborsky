@@ -4,10 +4,19 @@
 <head>
 	<title>Travel Rating</title>
 	<meta charset="utf-8" />
+	{% load staticfiles %}
+	<link rel="stylesheet" href="{% static 'travelprefs/css/bootstrap.min.css' %}" type='text/css'/>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	<style>
+		h1   {color: #42DAD3;}
+		h3   {color: #42DAD3;}
+		p    {color: #42DAD3;}
+		body {font-family: 'Open Sans', sans-serif;}
+	</style>
 </head>
 
-<body class="body" style="background-color:#f6f6f6">
-	<div>
+<body class="body" style="background-color:#8A8382">
+	<div style="margin-top:50px;">
 	   {% block content %}
 	   {% endblock %}	
 	</div>
