@@ -39,8 +39,8 @@ class ResultsView(View):
 			if not hp_range:
 				is_in_hp = False
 				break
-		if inputs[2]["divvy"] == "none":
-			inputs[2]["divvy"] = "low"
+		#if inputs[2]["divvy"] == "none":
+		#	inputs[2]["divvy"] = "low"
 		if inputs[1] == [] and inputs[2]["cta"] == "none" and inputs[2]["divvy"] == "none" and inputs[2]["shuttles"] == "none":
 			rv = [("Error: ", "Enter Points of Interest or Set Some Parameters Not To None")]
 		elif len(inputs[0]) == 1:
