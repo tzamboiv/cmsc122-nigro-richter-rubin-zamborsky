@@ -2,8 +2,8 @@ from django import forms
 from .models import Address, Preferences, All
 
 class HomeForm(forms.ModelForm):
-	streetad = forms.CharField(label = "Addresses", required = True, initial = "Separate by semicolons")
-	poi = forms.CharField(label = "Points of Interest", required = False, initial = "Separate by semicolons")
+	streetad = forms.CharField(label = "Addresses: Separate By Semicolons", required = True, initial = " ")
+	poi = forms.CharField(label = "Points of Interest: Separate By Semicolons", required = False, initial = " ")
 	divvy = forms.ChoiceField(label = "Divvy", choices = [("high", "High") ,("medium", "Medium"),("low", "Low"), ("none", "None")])
 	cta = forms.ChoiceField(label = "CTA Buses", choices = [("high", "High") ,("medium", "Medium"),("low", "Low"), ("none", "None")])
 	shuttles = forms.ChoiceField(label = "UChicago Shuttles", choices = [("high", "High") ,("medium", "Medium"),("low", "Low"), ("none", "None")])
