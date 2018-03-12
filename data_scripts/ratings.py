@@ -107,7 +107,7 @@ def poi_rating_for_address(address, poi_list, transit_prefs):
         poi_ratings.append(normalized_rating_for_poi(poi_dict))
     return weighted_average(poi_ratings, weights)
         
-
+        
 def location_rating_for_address(address, transit_prefs, cta_pref, south_side):
     walking_times_dict = travel_times.go(address, transit_prefs)
     return normalized_location_rating(walking_times_dict, cta_pref, south_side)
@@ -233,16 +233,39 @@ def find_closest_routes(travel_times_dict):
     return (closest_routes, closest_route_times)
     
 
+DAY_SHUTTLES = [
+    "53rd Street Express",
+    "Apostolic/Drexel", # Exclude Apostolic and Drexel independently
+    "Campus Shuttle",
+    "Friend Center/Metra",
+    "Hyde Park Route",
+    "Midway Route", # Exclude Midway Metra AM/PM independently
+    "Polsky Express"
+]
+NIGHT_SHUTTLES = [
+    "Central",
+    "East",
+    "North",
+    "South",
+    "Regents Express",
+    "South Loop Shuttle"
+]
+
 def shuttle_proximity_rating(shuttle_travel_times_dict):
-    routes, times = find_closest_routes(shuttle_travel_times_dict)
-    weights = [3, 1] # Should be list of 2 numbers
-    return weighted_average(times, weights)
-
-def cta_hours(cta_line_name):
-    pass
-
-def shuttle_hours(shuttle_name):
-    pass
+    day_shuttle_info = {}
+    night_shuttle_info = {}
+    for route in DAY_SHUTTLES:
+        day_shuttle_info[route] = shuttle_travel_times_dict[route]
+    for route in NIGHT_SHUTTLES:
+        night_shuttle_info[route] = shuttle_travel_times_dict[route]
+    day_routes, day_times = find_closest_routes(day_shuttle_info)
+    night_routes, night_times = find_closest_routes(night_shuttle_info)
+    first_second_weights = [3, 1] # Should be list of 2 numbers
+    day_rating = weighted_average(day_times, first_second_weights)
+    night_rating = weighted_average(night_times, first_second_weights)
+    day_night_weights = [1, 2] # Day weight, Night weight
+    return weighted_average([day_rating, night_rating], day_night_weights)
+    
 
 def normalized_rating_for_poi(poi_dict):
     '''
@@ -251,23 +274,38 @@ def normalized_rating_for_poi(poi_dict):
     TODO- Ignore travel types that won't be used when calculating the rating
     (because of some combination of weak preference and inconvenience)
     '''
-    ratings = {}
-    weightings = {
-        HIGH: 4,
-        MED: 2,
-        LOW: 1,
-        NONE: 0
-    }
-    raw_rating = 0
-    weights = []
-    for travel_type in poi_dict:
-        weight = weightings[poi_dict[travel_type]["ranking"]]
-        weights.append(weight)
-        raw_rating += poi_dict[travel_type]["time"] * weight
+    adjusted_ratings = {}
+    for travel_type, tt_info in poi_dict.items():
+        ranking = tt_info['ranking']
+        time = tt_info['time']
+        adjusted_ratings[travel_type] = {}
+        adjusted_ratings[travel_type]['time'] = adjusted_rating_for_poi_travel_type(time, ranking)
     
     # Normalize the rating
-    normalization_const = sum(weights)
-    return raw_rating / normalization_const
+    weights = [4, 1]
+    travel_types, adjusted_times = find_closest_routes(adjusted_ratings)
+    return weighted_average(adjusted_times, weights)
+    
+      
+def adjusted_rating_for_poi_travel_type(time, ranking):
+    '''
+    Helper function for choosing the best form of transportation to a given POI
+    based on the user's preferences.
+    '''
+    offset1 = 300
+    offset2 = 900
+    offset3 = 1500
+    time_offset = 0.7 * min(time, offset1)
+    time_offset += 0.5 * min(max(time - offset1, 0), offset2 - offset1)
+    time_offset += 0.3 * min(max(time - offset2, 0), offset3 - offset2)
+    adjusted_time = time
+    if ranking == HIGH:
+        adjusted_time = time - time_offset
+    elif ranking == LOW:
+        adjusted_time = time + time_offset
+    return adjusted_time
+    
+    
          
          
     
