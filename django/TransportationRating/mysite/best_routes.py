@@ -8,6 +8,9 @@ WEIGHTS = {
 }
 
 def best_travel_options(address_1, address_2, transit_inputs):
+    '''
+    Computes best and second best travel option between two addresses
+    '''
     travel_times = time_to_dest(adress_1, address_2, transit_inputs)
     adjusted_times = [WEIGHTS[type] * travel_times["type"] for type in travel_times]
     best_time = math.inf
@@ -27,8 +30,10 @@ def best_travel_options(address_1, address_2, transit_inputs):
 
 
 def compute_initial_score(address_1, address_2, transit_inputs):
+    '''
+    Computes initial rating score for two addresses
+    '''
     best_options = best_travel_options(address_1, address_2, transit_inputs)
-    # Mainly a placeholder- want to take into account both best and second best options
-    # reward best option for being good and penalize second best for being bad
+    
     total_score = math.log(best_options[0][1]) + 0.5 * math.exp(best_options[1][1])
     return total_score

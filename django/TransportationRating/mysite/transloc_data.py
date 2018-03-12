@@ -1,6 +1,7 @@
 import json
 import csv
 
+#Puts transloc data into csv for database
 routes = None
 with open("shuttle_routes.json") as f:
 	routes = json.load(f)

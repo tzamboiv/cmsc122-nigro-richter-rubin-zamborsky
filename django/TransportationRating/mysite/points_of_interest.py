@@ -8,15 +8,11 @@ from travel_times import haversine
 from travel_times import find_address_coords
 from travel_times import check_if_in_range
 
-#transit_inputs = dict of {transit type : ranking}
-#transit type = "divvy", "cta", "shuttles", "driving", "bicycling", "walking"
-#ranking = "none", "low", "medium", "high"
 
-#this function: walking, driving, biking, cta
-#to do manually: divvy, shuttles
-
-#nested dictionary of transit type to time and ranking; if ranking = none, not included in dict
 def time_to_dest(address, address_coords, poi, transit_inputs, gmaps):
+	'''
+	Computes the travel time from address to poi for walking, driving, transit, bicycling
+	'''
 	returns = {}
 	for transit_type, ranking in transit_inputs.items():
 		if ranking != "none" and transit_type != "divvy" and transit_type != "shuttles":
@@ -37,6 +33,9 @@ def time_to_dest(address, address_coords, poi, transit_inputs, gmaps):
 
 
 def get_divvy_travel_times(address, address_coords, transit_inputs, gmaps):
+	'''
+	Computes walking time from an address to divvy stop
+	'''
 	db = sqlite3.connect("transit.db")
 	c = db.cursor()
 	r = c.execute("SELECT station_name, lat, lon FROM divvy;")
@@ -61,6 +60,9 @@ def get_divvy_travel_times(address, address_coords, transit_inputs, gmaps):
 
 
 def divvy_time_to_dest(address, poi, transit_inputs, gmaps):
+	'''
+	Computes travel time from address to poi for Divvy
+	'''
 	poi_nearest_divvy_stops = get_divvy_travel_times(poi["formatted_address"], (poi["geometry"]["location"]["lat"], poi["geometry"]["location"]["lng"]), transit_inputs, gmaps)
 	closest_poi_stop = sorted([(poi_nearest_divvy_stops[p]['time'], p) for p in poi_nearest_divvy_stops])[0]
 	divvy_input = {"divvy" : transit_inputs["divvy"], "shuttles" : "none", "cta" : "none"}
@@ -75,13 +77,16 @@ def divvy_time_to_dest(address, poi, transit_inputs, gmaps):
 
 
 def go(address, poi_query, transit_inputs):
-    api_key="AIzaSyB6jVa5oN8mBp8kna3l8obDYsqrb1ja6EE"
-    gmaps = googlemaps.Client(key=api_key)
-    address_coords = find_address_coords(address, gmaps)
-    if not check_if_in_range(address_coords):
-	    return "Error: address not in Hyde Park"
-    poi = gmaps.places(poi_query, address_coords)["results"][0]
-    output_dict = time_to_dest(address, address_coords, poi, transit_inputs, gmaps)
-    if transit_inputs["divvy"] != "none":
-        output_dict["divvy"] = divvy_time_to_dest(address, poi, transit_inputs, gmaps)
-    return output_dict
+	'''
+	Computes poi travel information for each transit type
+	'''
+	api_key="AIzaSyB6jVa5oN8mBp8kna3l8obDYsqrb1ja6EE"
+	gmaps = googlemaps.Client(key=api_key)
+	address_coords = find_address_coords(address, gmaps)
+	if not check_if_in_range(address_coords):
+		return "Error: address not in Hyde Park"
+	poi = gmaps.places(poi_query, address_coords)["results"][0]
+	output_dict = time_to_dest(address, address_coords, poi, transit_inputs, gmaps)
+	if transit_inputs["divvy"] != "none":
+		output_dict["divvy"] = divvy_time_to_dest(address, poi, transit_inputs, gmaps)
+	return output_dict

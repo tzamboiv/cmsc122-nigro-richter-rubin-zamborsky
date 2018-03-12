@@ -7,31 +7,27 @@ import requests
 
 def haversine(lat1, lon1, lat2, lon2):
     '''
-    Calculate the circle distance between two points
-    on the earth (specified in decimal degrees)
+    Computes haversine distance between two points
     '''
-    # convert decimal degrees to radians
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-
-    # haversine formula
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-    c = 2 * asin(sqrt(a))
-
-    # 6367 km is the radius of the Earth
-    km = 6367 * c
-    m = km * 1000
-    return m
+    a = sin((lat2 - lat1) / 2)**2 + cos(lat1) * cos(lat2) * sin((lon2 - lon1) / 2)**2
+    circ = 2 * asin(sqrt(a))
+    return 6367 * circ * 1000
 
 
 def find_address_coords(address, gmaps):
+	'''
+	Converts address to latitude and longitute
+	'''
 	coords = gmaps.geocode(address)[0]["geometry"]["location"]
 	return (coords['lat'], coords['lng'])
 
 
-#modify to calculate travel times for POIs (i.e. outside of hyde park) by pulling stops from sql database that are within a certain radius
+
 def get_travel_times(lat_range, lon_range, address, address_coords, gmaps, query_type):
+	'''
+	Computes walking time from address to nearby transit of type query_type
+	'''
 	db = sqlite3.connect("transit.db")
 	c = db.cursor()
 	if query_type == "divvy":
@@ -66,8 +62,10 @@ def get_travel_times(lat_range, lon_range, address, address_coords, gmaps, query
 	return walk_times
 
 
-#Still need to manually categorize downtown vs. hyde park stops
 def check_if_in_range(address_coords):
+	'''
+	Checks if address in Hyde Park/Kenwood
+	'''
 	#Hyde Park + Kenwood area
 	lat_range = (41.765605, 41.812444)
 	lon_range = (-87.625826, -87.583701)
@@ -77,6 +75,9 @@ def check_if_in_range(address_coords):
 
 
 def go(address, transit_inputs):
+	'''
+	Computes walking times to all transit types from transit_inputs
+	'''
 	api_key="AIzaSyB6jVa5oN8mBp8kna3l8obDYsqrb1ja6EE"
 	gmaps = googlemaps.Client(key=api_key)
 	address_coords = find_address_coords(address, gmaps)

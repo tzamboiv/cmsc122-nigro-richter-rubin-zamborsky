@@ -3,6 +3,9 @@ import json
 import csv
 
 def get_divvy_stops():
+	'''
+	Pulls all divvy stop information
+	'''
 	URL = "https://feeds.divvybikes.com/stations/stations.json"
 	pm = urllib3.PoolManager()
 	html = pm.urlopen(url = URL, method = "GET")
@@ -10,6 +13,9 @@ def get_divvy_stops():
 	return dic
 
 def make_divvy_csv():
+	'''
+	Creates csv with all divvy stop information
+	'''
 	fieldnames = ["id", "landmark", "lat", "lon", "station_name"]
 	with open("divvy.csv","w") as f:
 		writer = csv.DictWriter(f, fieldnames = fieldnames)

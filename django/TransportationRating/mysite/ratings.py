@@ -48,6 +48,9 @@ CTA_CLASSIFICATION = {
 }
 
 def cta_goes_to_destination(cta_route, destination_code):
+    '''
+    Checks if CTA does to destinate
+    '''
     classifier = CTA_CLASSIFICATION[cta_route]
     bit_place = int(math.log(destination_code, 2))
     return ((classifier & (1 << bit_place)) != 0)
@@ -56,6 +59,7 @@ def cta_goes_to_destination(cta_route, destination_code):
 
 def compute_rankings(user_input):
     '''
+    Computes the ranking of input dictionary
     '''
     # Extract information
     apartment_list = user_input[0] # List of apartment addresses
@@ -100,6 +104,9 @@ def rating_for_address(address, poi_list, transit_prefs, cta_pref, south_side):
     
             
 def poi_rating_for_address(address, poi_list, transit_prefs):
+    '''
+    Computs poi rating for address
+    '''
     weights = [1 / (idx + 1) for idx in range(len(poi_list))]
     poi_ratings = []
     for poi in poi_list:
@@ -109,6 +116,9 @@ def poi_rating_for_address(address, poi_list, transit_prefs):
         
         
 def location_rating_for_address(address, transit_prefs, cta_pref, south_side):
+    '''
+    Computes location rating for address
+    '''
     walking_times_dict = travel_times.go(address, transit_prefs)
     return normalized_location_rating(walking_times_dict, cta_pref, south_side)
 
@@ -149,7 +159,7 @@ def normalized_location_rating(walking_times_dict, cta_pref, south_side):
   
 def cta_proximity_rating(cta_travel_times_dict, cta_pref, south_side):
     '''
-    TODO: Change the route sorting to be in a separate function that is only run once
+    Computes CTA proximity rating
     '''
     # Sort all routes based on their destination
     destinations = [HP, DT, SS, UC]
@@ -211,7 +221,6 @@ def find_closest_routes(travel_times_dict):
     containing travel times, finds the two closest stops and the time to each. 
     Returns a tuple of lists: (stops, times).
     
-    TODO: Make this work for arbitrary number of stops (not just 2)
     '''
     # Determine the relevant stops and their related times
     num_routes_to_include = 2
@@ -252,6 +261,9 @@ NIGHT_SHUTTLES = [
 ]
 
 def shuttle_proximity_rating(shuttle_travel_times_dict):
+    '''
+    Computes shuttle proximity rating
+    '''
     day_shuttle_info = {}
     night_shuttle_info = {}
     for route in DAY_SHUTTLES:
