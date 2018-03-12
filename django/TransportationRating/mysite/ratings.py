@@ -50,6 +50,7 @@ CTA_CLASSIFICATION = {
 
 def cta_goes_to_destination(cta_route, destination_code):
     '''
+<<<<<<< HEAD:data_scripts/ratings.py
     Helper method for the CTA classification given above. Given a
     CTA route number (one of the keys in the CTA_CLASSIFICATION
     dict) and a destination code (one of UC, HP, DT, and SS),
@@ -61,6 +62,9 @@ def cta_goes_to_destination(cta_route, destination_code):
         destination_code: (int) UC, HP, DT, or SS
     
     Returns: (boolean) Does the given CTA route go to that destination?
+=======
+    Checks if CTA does to destinate
+>>>>>>> cc89ed86b8f82f0380ca7df9af2fb8ba00a4cabb:django/TransportationRating/mysite/ratings.py
     '''
     classifier = CTA_CLASSIFICATION[cta_route]
     bit_place = int(math.log(destination_code, 2))
@@ -70,6 +74,7 @@ def cta_goes_to_destination(cta_route, destination_code):
 
 def compute_rankings(user_input):
     '''
+<<<<<<< HEAD:data_scripts/ratings.py
     Compute a rating for each address given in the user input, based on the
     preferences given in the user input. This is the main function used
     to interface between the ratings system and the UI.
@@ -102,6 +107,9 @@ def compute_rankings(user_input):
     Returns: (dict) A dictionary mapping addresses (strings) to their ratings
         (floats). Each address given in the user input contains an entry in the
         dictionary.
+=======
+    Computes the ranking of input dictionary
+>>>>>>> cc89ed86b8f82f0380ca7df9af2fb8ba00a4cabb:django/TransportationRating/mysite/ratings.py
     '''
     # Extract information
     cleaned_user_input = parse_user_input(user_input)
@@ -274,9 +282,36 @@ def rating_for_address(address, poi_list, transit_prefs, cta_pref, south_side):
         return weighted_average([loc_rating, poi_rating], weights)
     else:
         return loc_rating
+<<<<<<< HEAD:data_scripts/ratings.py
+=======
+    
+            
+def poi_rating_for_address(address, poi_list, transit_prefs):
+    '''
+    Computs poi rating for address
+    '''
+    weights = [1 / (idx + 1) for idx in range(len(poi_list))]
+    poi_ratings = []
+    for poi in poi_list:
+        poi_dict = points_of_interest.go(address, poi, transit_prefs)
+        poi_ratings.append(normalized_rating_for_poi(poi_dict))
+    return weighted_average(poi_ratings, weights)
+        
+>>>>>>> cc89ed86b8f82f0380ca7df9af2fb8ba00a4cabb:django/TransportationRating/mysite/ratings.py
         
             
 def location_rating_for_address(address, transit_prefs, cta_pref, south_side):
+<<<<<<< HEAD:data_scripts/ratings.py
+=======
+    '''
+    Computes location rating for address
+    '''
+    walking_times_dict = travel_times.go(address, transit_prefs)
+    return normalized_location_rating(walking_times_dict, cta_pref, south_side)
+
+
+def normalized_location_rating(walking_times_dict, cta_pref, south_side):
+>>>>>>> cc89ed86b8f82f0380ca7df9af2fb8ba00a4cabb:django/TransportationRating/mysite/ratings.py
     '''
     Calculate a rating for this address based on its proximity to CTA bus stops,
     uChicago shuttles, and Divvy bike stations. Assumes that this rating can
@@ -326,6 +361,7 @@ def location_rating_for_address(address, transit_prefs, cta_pref, south_side):
   
 def cta_proximity_rating(cta_travel_times_dict, cta_pref, south_side):
     '''
+<<<<<<< HEAD:data_scripts/ratings.py
     Calculate a proximity rating based on the travel times to local CTA stops
     and the user's preferences.
     
@@ -336,6 +372,9 @@ def cta_proximity_rating(cta_travel_times_dict, cta_pref, south_side):
         south_side: (boolean) Same as everywhere else
     
     Returns: (float) A rating measuring the proxmity to CTA bus routes
+=======
+    Computes CTA proximity rating
+>>>>>>> cc89ed86b8f82f0380ca7df9af2fb8ba00a4cabb:django/TransportationRating/mysite/ratings.py
     '''
     # Sort all routes based on their destination
     destinations = [HP, DT, SS, UC]
@@ -398,6 +437,35 @@ def divvy_proximity_rating(divvy_travel_times_dict):
     )
     normalized_rating = raw_rating / sum(weights)
     return normalized_rating
+<<<<<<< HEAD:data_scripts/ratings.py
+=======
+
+def find_closest_routes(travel_times_dict):
+    '''
+    Given a dict mapping route names (or site names, for divvy bikes) to dicts
+    containing travel times, finds the two closest stops and the time to each. 
+    Returns a tuple of lists: (stops, times).
+    
+    '''
+    # Determine the relevant stops and their related times
+    num_routes_to_include = 2
+    # The first element in the list is the closest stop, etc.
+    closest_routes = [None] * num_routes_to_include
+    closest_route_times = [math.inf] * num_routes_to_include
+    for route, route_dict in travel_times_dict.items():
+        time = route_dict["time"]
+        if time < closest_route_times[0]:
+            # New closest stop
+            closest_route_times[1] = closest_route_times[0]
+            closest_routes[1] = closest_routes[0]
+            closest_route_times[0] = time
+            closest_routes[0] = route
+        elif time < closest_route_times[1]:
+            # New second-closest stop
+            closest_route_times[1] = time
+            closest_routes[1] = route
+    return (closest_routes, closest_route_times)
+>>>>>>> cc89ed86b8f82f0380ca7df9af2fb8ba00a4cabb:django/TransportationRating/mysite/ratings.py
     
 
 DAY_SHUTTLES = [
@@ -421,6 +489,7 @@ NIGHT_SHUTTLES = [
 
 def shuttle_proximity_rating(shuttle_travel_times_dict):
     '''
+<<<<<<< HEAD:data_scripts/ratings.py
     Generate a rating for this address' proximity to uChicago shuttle routes
     
     Inputs: 
@@ -430,6 +499,10 @@ def shuttle_proximity_rating(shuttle_travel_times_dict):
     Returns: (float) A rating measuring the proximity to uChciago shuttle routes
     '''
     # Split shuttles into day and night shuttles
+=======
+    Computes shuttle proximity rating
+    '''
+>>>>>>> cc89ed86b8f82f0380ca7df9af2fb8ba00a4cabb:django/TransportationRating/mysite/ratings.py
     day_shuttle_info = {}
     night_shuttle_info = {}
     for route in DAY_SHUTTLES:

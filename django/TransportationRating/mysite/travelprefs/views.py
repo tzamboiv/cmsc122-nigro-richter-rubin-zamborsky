@@ -28,7 +28,9 @@ class HomeView(TemplateView):
 class ResultsView(View):
 
 	def get(self, request):
-		
+		'''
+		Main function for executing ranking and return results
+		'''
 		inputs = get_dict()
 		is_in_hp = True
 		api_key="AIzaSyB6jVa5oN8mBp8kna3l8obDYsqrb1ja6EE"
@@ -39,15 +41,13 @@ class ResultsView(View):
 			if not hp_range:
 				is_in_hp = False
 				break
-		#if inputs[2]["divvy"] == "none":
-		#	inputs[2]["divvy"] = "low"
+		
 		if inputs[1] == [] and inputs[2]["cta"] == "none" and inputs[2]["divvy"] == "none" and inputs[2]["shuttles"] == "none":
 			rv = [("Error: ", "Enter Points of Interest or Set Some Parameters Not To None")]
 		elif len(inputs[0]) == 1:
 			rv = [("Error: ", "Enter More Than One Address For Ranking")]
 
-		#elif inputs[2]["cta"] == "none" or inputs[2]["divvy"] == "none" or inputs[2]["shuttles"] == "none":
-		#	rv = [("Error: ", "Internal Error")]
+		
 		elif len(inputs[0]) > 5:
 			rv = [("Error: ", "Enter Fewer Than Five Addresses")]
 		elif len(inputs[1]) > 5:
@@ -68,6 +68,9 @@ class ResultsView(View):
 DB_NAME = "db.sqlite3"
 
 def get_dict():
+	'''
+	Creates input dictionary
+	'''
 	order = " streetad, poi, divvy, cta, shuttles, driving, bicycling, walking, downtown, southside "
 	db = sqlite3.connect(DB_NAME)
 	cursor = db.cursor()
